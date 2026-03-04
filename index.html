@@ -362,7 +362,14 @@ function getOrder(g) {
   return [...seededShuffle(main, (g + 1) * 6271), ...bonus];
 }
 
-let state = { group: null, checked: {} };
+function loadState() {
+  try { const s = localStorage.getItem('hunt_checked'); return s ? JSON.parse(s) : {}; } catch(e) { return {}; }
+}
+function saveState() {
+  try { localStorage.setItem('hunt_checked', JSON.stringify(state.checked)); } catch(e) {}
+}
+
+let state = { group: null, checked: loadState() };
 const key = (g, ci) => `${g}_${ci}`;
 
 function buildHome() {
@@ -415,7 +422,7 @@ function renderList() {
       </div>
       <div class="clue-check"><div class="check-box">${done ? '✓' : ''}</div></div>
     `;
-    item.onclick = () => { state.checked[key(g, ci)] = !state.checked[key(g, ci)]; renderList(); buildHome(); };
+    item.onclick = () => { state.checked[key(g, ci)] = !state.checked[key(g, ci)]; saveState(); renderList(); buildHome(); };
     list.appendChild(item);
   });
 
