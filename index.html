@@ -211,10 +211,12 @@
   }
 
   .clue-desc {
-    font-size: 13px;
-    color: var(--muted);
+    font-size: 14px;
+    color: var(--ink);
     line-height: 1.55;
   }
+
+  .bonus-inline { color: var(--accent); }
 
   .clue-check {
     width: 56px;
@@ -237,7 +239,7 @@
   /* DONE */
   .clue-item.done { background: var(--done-bg); }
   .clue-item.done .clue-title { text-decoration: line-through; color: var(--muted); }
-  .clue-item.done .clue-desc { opacity: 0.45; }
+  .clue-item.done .clue-desc { text-decoration: line-through; opacity: 0.45; }
   .clue-item.done .clue-num { opacity: 0.35; }
   .clue-item.done .check-box { background: var(--done-ink); border-color: var(--done-ink); color: white; }
 
@@ -286,7 +288,7 @@
   <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
   <div class="clue-list" id="clue-list"></div>
   <div class="done-bar" id="done-bar">
-    <div>All clues found! 🎉</div>
+    <div>All clues found, head back to Courtyard! 🎉</div>
     <div class="trophy">🏆</div>
   </div>
 </div>
@@ -296,49 +298,49 @@ const CLUES = [
   {
     tag: "Manning Bar",
     title: "Rainbow Entrance",
-    desc: "Find Manning Bar — where countless O-week parties have been held — and step inside to discover the entrance with a rainbow beneath your feet! Bonus points for arranging yourselves in rainbow colours for the photo.",
+    desc: "Find Manning Bar, where countless O-week parties have been held and step inside to discover the entrance with a rainbow beneath your feet! (Bonus: arrange yourselves in the colours of the rainbow for the photo.)",
     bonus: false,
   },
   {
     tag: "Business School (BHB/ABS)",
     title: "Grand Spiral Staircase",
-    desc: "Find the Business School Building and look for the grand spiral staircase which has won architectural prizes. Take the best abstract or dramatic photo you can!",
+    desc: "Hunt down the most impressive spiral staircase on campus, there may even be an architectural gem!",
     bonus: false,
   },
   {
     tag: "Quadrangle",
     title: "Oldest Building on Campus",
-    desc: "Snap a picture in the courtyard of the Quadrangle — the oldest building at the university and an important venue for exams.",
+    desc: "Snap a picture at the Quadrangle, our very own Hogwarts and university's oldest building. (Bonus: if the pose is Harry Potter inspired)",
     bonus: false,
   },
   {
     tag: "Underground",
     title: "Graffiti Tunnel",
-    desc: "Head underground to find the graffiti tunnel. Walk through, find a piece that stands out to you, and snap a pic with it!",
+    desc: "Head underground to find the Graffiti Tunnel. Walk through the art, find a piece that stands out and snap a pic with it!",
     bonus: false,
   },
   {
     tag: "Wentworth Building",
     title: "UNIBROS Kebabs",
-    desc: "Grab a snapshot of this iconic kebab shop in the Wentworth Building, where their wraps and snacks hit the spot. Find the BROs who serve it hot 😉",
+    desc: "Find the iconic food spot located in the Wentworth building, where everyone gets their kebab fix.",
     bonus: false,
   },
   {
     tag: "Fisher Library",
     title: "Rooftop Views",
-    desc: "Take the lift in this popular library all the way up, step outside onto the rooftop, feel the sun, and enjoy the view. Your main-character study-break moment awaits.",
+    desc: "Head on up USYD's Biggest Library and find the rooftop where you would go to catch views while studying.",
     bonus: false,
   },
   {
     tag: "Victoria Park",
     title: "Heritage Parklands",
-    desc: "Grab a scenic picture in Victoria Park — a heritage site designed alongside the university. Bonus points if you capture some local wildlife (ibis mandatory 🐦).",
+    desc: "Grab a scenic picture in Victoria Park: A heritage site designed alongside the university. (Bonus: capture some local wildlife like a particularly annoying bird)",
     bonus: false,
   },
   {
     tag: "Bonus Challenge",
     title: "Find a Dinosaur 🦕",
-    desc: "Somewhere on or near campus, a dinosaur is waiting. Hunt it down and take a photo with it. Good luck — you'll need it.",
+    desc: "Snap a picture with a Dinosaur (up for interpretation)!",
     bonus: true,
   },
 ];
@@ -413,12 +415,17 @@ function renderList() {
 
     const item = document.createElement('div');
     item.className = 'clue-item' + (done ? ' done' : '');
+    const keywords = ['Manning Bar', 'spiral staircase', 'Quadrangle', 'Graffiti Tunnel', "USYD's Biggest Library", 'Victoria Park', 'Dinosaur (up for interpretation)'];
+    let formattedDesc = clue.desc;
+    keywords.forEach(kw => {
+      formattedDesc = formattedDesc.replace(kw, `<strong>${kw}</strong>`);
+    });
+    formattedDesc = formattedDesc.replace(/(\(Bonus:[^)]*\))/g, '<br><span class="bonus-inline">$1</span>');
     item.innerHTML = `
       <div class="clue-num-col"><div class="clue-num">${String(pos + 1).padStart(2, '0')}</div></div>
       <div class="clue-content">
-        <div class="clue-tag${clue.bonus ? ' bonus' : ''}">${clue.tag}</div>
-        <div class="clue-title">${clue.title}</div>
-        <div class="clue-desc">${clue.desc}</div>
+        ${clue.bonus ? '<div class="clue-tag bonus">Bonus</div>' : ''}
+        <div class="clue-desc">${formattedDesc}</div>
       </div>
       <div class="clue-check"><div class="check-box">${done ? '✓' : ''}</div></div>
     `;
