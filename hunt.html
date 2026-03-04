@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>USyd Hunt</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #f5f0e8;
+    --ink: #1a1a1a;
+    --muted: #8a8070;
+    --line: #d4cfc4;
+    --done-bg: #e8f0e4;
+    --done-ink: #6a9060;
+    --accent: #d4522a;
+    --bonus: #c08c30;
+    --radius: 12px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ══ HOME ══ */
+  #home { padding: 60px 28px 40px; justify-content: center; align-items: flex-start; }
+
+  .wordmark {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .home-title {
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+
+  .home-title em { font-style: normal; color: var(--accent); }
+
+  .home-sub {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 52px;
+    line-height: 1.5;
+  }
+
+  .group-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .group-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    width: 100%;
+  }
+
+  .group-btn {
+    aspect-ratio: 1;
+    background: white;
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius);
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+    transition: transform .1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+    padding-bottom: 18px;
+  }
+
+  .group-btn:active { transform: scale(.93); }
+
+  .dot-row {
+    display: flex;
+    gap: 3px;
+    position: absolute;
+    bottom: 9px;
+  }
+
+  .dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--line);
+    transition: background .2s;
+  }
+
+  .dot.filled { background: var(--done-ink); }
+
+  /* ══ HUNT ══ */
+  #hunt { padding: 0; }
+
+  .hunt-bar {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding: 16px 20px 12px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .back {
+    background: none;
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    letter-spacing: 1px;
+    padding: 4px 0;
+    flex-shrink: 0;
+  }
+
+  .hunt-bar-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    flex: 1;
+  }
+
+  .progress-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .progress-track { height: 2px; background: var(--line); }
+  .progress-fill {
+    height: 100%;
+    background: var(--done-ink);
+    transition: width .4s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* CLUE ITEMS */
+  .clue-list { padding: 0 0 100px; }
+
+  .clue-item {
+    display: flex;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    transition: background .15s;
+  }
+
+  .clue-item:active { background: rgba(0,0,0,.03); }
+
+  .clue-num-col {
+    width: 52px;
+    padding: 20px 0 18px 20px;
+    flex-shrink: 0;
+  }
+
+  .clue-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .clue-content {
+    flex: 1;
+    padding: 18px 0 18px 0;
+  }
+
+  .clue-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 3px;
+  }
+
+  .clue-tag.bonus { color: var(--bonus); }
+
+  .clue-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  .clue-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .clue-check {
+    width: 56px;
+    padding: 20px 20px 18px 0;
+    display: flex;
+    justify-content: flex-end;
+    flex-shrink: 0;
+  }
+
+  .check-box {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: 1.5px solid var(--line);
+    background: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    transition: all .2s;
+  }
+
+  /* DONE */
+  .clue-item.done { background: var(--done-bg); }
+  .clue-item.done .clue-title { text-decoration: line-through; color: var(--muted); }
+  .clue-item.done .clue-desc { opacity: 0.45; }
+  .clue-item.done .clue-num { opacity: 0.35; }
+  .clue-item.done .check-box { background: var(--done-ink); border-color: var(--done-ink); color: white; }
+
+  /* DONE BAR */
+  .done-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--ink);
+    color: white;
+    padding: 20px 24px 36px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 1px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transform: translateY(100%);
+    transition: transform .35s cubic-bezier(.4,0,.2,1);
+    z-index: 20;
+  }
+
+  .done-bar.visible { transform: translateY(0); }
+  .done-bar .trophy { font-size: 24px; }
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div class="wordmark">USyd O-Week 2025</div>
+  <h1 class="home-title">Scavenger<br><em>Hunt.</em></h1>
+  <p class="home-sub">Pick your group. Each group gets a different clue order!</p>
+  <div class="group-label">Select your group</div>
+  <div class="group-grid" id="group-grid"></div>
+</div>
+
+<!-- HUNT -->
+<div id="hunt" class="screen">
+  <div class="hunt-bar">
+    <button class="back" onclick="goHome()">← back</button>
+    <div class="hunt-bar-title" id="hunt-title">Group 1</div>
+    <div class="progress-text" id="progress-text">0 / 8</div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <div class="clue-list" id="clue-list"></div>
+  <div class="done-bar" id="done-bar">
+    <div>All clues found! 🎉</div>
+    <div class="trophy">🏆</div>
+  </div>
+</div>
+
+<script>
+const CLUES = [
+  {
+    tag: "Manning Bar",
+    title: "Rainbow Entrance",
+    desc: "Find Manning Bar — where countless O-week parties have been held — and step inside to discover the entrance with a rainbow beneath your feet! Bonus points for arranging yourselves in rainbow colours for the photo.",
+    bonus: false,
+  },
+  {
+    tag: "Business School (BHB/ABS)",
+    title: "Grand Spiral Staircase",
+    desc: "Find the Business School Building and look for the grand spiral staircase which has won architectural prizes. Take the best abstract or dramatic photo you can!",
+    bonus: false,
+  },
+  {
+    tag: "Quadrangle",
+    title: "Oldest Building on Campus",
+    desc: "Snap a picture in the courtyard of the Quadrangle — the oldest building at the university and an important venue for exams.",
+    bonus: false,
+  },
+  {
+    tag: "Underground",
+    title: "Graffiti Tunnel",
+    desc: "Head underground to find the graffiti tunnel. Walk through, find a piece that stands out to you, and snap a pic with it!",
+    bonus: false,
+  },
+  {
+    tag: "Wentworth Building",
+    title: "UNIBROS Kebabs",
+    desc: "Grab a snapshot of this iconic kebab shop in the Wentworth Building, where their wraps and snacks hit the spot. Find the BROs who serve it hot 😉",
+    bonus: false,
+  },
+  {
+    tag: "Fisher Library",
+    title: "Rooftop Views",
+    desc: "Take the lift in this popular library all the way up, step outside onto the rooftop, feel the sun, and enjoy the view. Your main-character study-break moment awaits.",
+    bonus: false,
+  },
+  {
+    tag: "Victoria Park",
+    title: "Heritage Parklands",
+    desc: "Grab a scenic picture in Victoria Park — a heritage site designed alongside the university. Bonus points if you capture some local wildlife (ibis mandatory 🐦).",
+    bonus: false,
+  },
+  {
+    tag: "Bonus Challenge",
+    title: "Find a Dinosaur 🦕",
+    desc: "Somewhere on or near campus, a dinosaur is waiting. Hunt it down and take a photo with it. Good luck — you'll need it.",
+    bonus: true,
+  },
+];
+
+const NUM_GROUPS = 8;
+
+function seededShuffle(arr, seed) {
+  const a = [...arr];
+  let s = seed >>> 0;
+  const rand = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 0x100000000; };
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function getOrder(g) {
+  const main = CLUES.map((c, i) => i).filter(i => !CLUES[i].bonus);
+  const bonus = CLUES.map((c, i) => i).filter(i => CLUES[i].bonus);
+  return [...seededShuffle(main, (g + 1) * 6271), ...bonus];
+}
+
+let state = { group: null, checked: {} };
+const key = (g, ci) => `${g}_${ci}`;
+
+function buildHome() {
+  const grid = document.getElementById('group-grid');
+  grid.innerHTML = '';
+  for (let g = 0; g < NUM_GROUPS; g++) {
+    const order = getOrder(g);
+    const btn = document.createElement('button');
+    btn.className = 'group-btn';
+    btn.textContent = g + 1;
+
+    const dotRow = document.createElement('div');
+    dotRow.className = 'dot-row';
+    order.forEach(ci => {
+      const d = document.createElement('div');
+      d.className = 'dot' + (state.checked[key(g, ci)] ? ' filled' : '');
+      dotRow.appendChild(d);
+    });
+    btn.appendChild(dotRow);
+    btn.onclick = () => openGroup(g);
+    grid.appendChild(btn);
+  }
+}
+
+function openGroup(g) {
+  state.group = g;
+  document.getElementById('hunt-title').textContent = `Group ${g + 1}`;
+  setScreen('hunt');
+  renderList();
+}
+
+function renderList() {
+  const g = state.group;
+  const order = getOrder(g);
+  const list = document.getElementById('clue-list');
+  list.innerHTML = '';
+
+  order.forEach((ci, pos) => {
+    const clue = CLUES[ci];
+    const done = !!state.checked[key(g, ci)];
+
+    const item = document.createElement('div');
+    item.className = 'clue-item' + (done ? ' done' : '');
+    item.innerHTML = `
+      <div class="clue-num-col"><div class="clue-num">${String(pos + 1).padStart(2, '0')}</div></div>
+      <div class="clue-content">
+        <div class="clue-tag${clue.bonus ? ' bonus' : ''}">${clue.tag}</div>
+        <div class="clue-title">${clue.title}</div>
+        <div class="clue-desc">${clue.desc}</div>
+      </div>
+      <div class="clue-check"><div class="check-box">${done ? '✓' : ''}</div></div>
+    `;
+    item.onclick = () => { state.checked[key(g, ci)] = !state.checked[key(g, ci)]; renderList(); buildHome(); };
+    list.appendChild(item);
+  });
+
+  const done = order.filter(ci => state.checked[key(g, ci)]).length;
+  const total = order.length;
+  document.getElementById('progress-text').textContent = `${done} / ${total}`;
+  document.getElementById('progress-fill').style.width = (done / total * 100) + '%';
+  document.getElementById('done-bar').classList.toggle('visible', done === total);
+}
+
+function setScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() { setScreen('home'); buildHome(); }
+
+buildHome();
+</script>
+</body>
+</html>
